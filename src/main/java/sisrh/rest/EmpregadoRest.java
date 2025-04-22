@@ -75,4 +75,23 @@ public class EmpregadoRest {
 		}
 	}
 
+	@Path("{matricula}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response excluirEmpregado(@PathParam("matricula") String matricula) throws Exception {
+		try {
+			if (Banco.buscarEmpregadoPorMatricula(matricula) == null) {
+				return Response.status(Status.NOT_FOUND).entity("{ \"mensagem\" : \"Empregado nao encontrado!\" }")
+						.build();
+			}
+			Banco.excluirEmpregado(matricula);
+			return Response.ok().entity("{ \"mensagem\" : \"Empregado " + matricula + " excluido!\" }").build();
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity("{ \"mensagem\" : \"Falha na exclusao do empregado!\" , \"detalhe\" :  \"" + e.getMessage()
+							+ "\"  }")
+					.build();
+		}
+	}
+
 }
