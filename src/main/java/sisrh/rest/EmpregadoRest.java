@@ -40,4 +40,19 @@ public class EmpregadoRest {
 		}
 	}
 
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response incluirEmpregado(Empregado empregado) {
+		try {
+			Empregado emp = Banco.incluirEmpregado(empregado);
+			return Response.ok().entity(emp).build();
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity("{ \"mensagem\" : \"Falha na inclusao do empregado!\" , \"detalhe\" :  \"" + e.getMessage()
+							+ "\"  }")
+					.build();
+		}
+	}
+
 }
