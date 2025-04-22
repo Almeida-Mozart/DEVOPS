@@ -55,4 +55,24 @@ public class EmpregadoRest {
 		}
 	}
 
+	@PUT
+	@Path("{matricula}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response alterarEmpregado(@PathParam("matricula") String matricula, Empregado empregado) {
+		try {
+			if (Banco.buscarEmpregadoPorMatricula(matricula) == null) {
+				return Response.status(Status.NOT_FOUND).entity("{ \"mensagem\" : \"Empregado nao encontrado!\" }")
+						.build();
+			}
+			Empregado emp = Banco.alterarEmpregado(matricula, empregado);
+			return Response.ok().entity(emp).build();
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity("{ \"mensagem\" : \"Falha na alteracao do empregado!\" , \"detalhe\" :  \"" + e.getMessage()
+							+ "\"  }")
+					.build();
+		}
+	}
+
 }
