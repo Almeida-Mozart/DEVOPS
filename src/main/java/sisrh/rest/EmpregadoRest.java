@@ -6,6 +6,7 @@ import javax.ws.rs.core.*;
 import io.swagger.annotations.Api;
 import sisrh.banco.Banco;
 import sisrh.dto.Empregado;
+import javax.ws.rs.core.Response.Status;
 
 @Api
 @Path("/empregado")
@@ -19,4 +20,24 @@ public class EmpregadoRest {
 		};
 		return Response.ok().entity(entity).build();
 	}
+
+	@GET
+	@Path("{matricula}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response obterEmpregado(@PathParam("matricula") String matricula) throws Exception {
+		try {
+			Empregado empregado = Banco.buscarEmpregadoPorMatricula(matricula);
+			if (empregado != null) {
+				return Response.ok().entity(empregado).build();
+			} else {
+				return Response.status(Status.NOT_FOUND).entity("{ \"mensagem\" : \"Empregado nao encontrado!\" }")
+						.build();
+			}
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+					"{ \"mensagem\" : \"Falha para obter empregado!\" , \"detalhe\" :  \"" + e.getMessage() + "\"  }")
+					.build();
+		}
+	}
+
 }
