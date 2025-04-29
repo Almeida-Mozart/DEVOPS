@@ -1,0 +1,54 @@
+name: Discord
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configurar Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Build com Maven
+        run: mvn clean package
+
+  notify:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Enviar notificação ao Discord
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ needs.build.result }}  
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.sha }}
+          PR: ${{ github.event.pull_request.number || 'n/a' }}
+          USER: ${{ github.actor }}
+        run: |
+          if [ "$STATUS" = "success" ]; then
+            COLOR=3066993
+          else
+            COLOR=15158332
+          fi
+
+          curl -H "Content-Type: application/json" \
+            -d "{ \
+              \"username\":\"GitHub Actions Bot\", \
+              \"embeds\":[{ \
+                \"title\":\"${REPO} — ${STATUS^^}\", \
+                \"description\":\"Evento: ${EVENT}\nPR: #${PR}\nCommit: ${SHA}\nPor: ${USER}\", \
+                \"color\":${COLOR} \
+              }] \
+            }" \
+            $WEBHOOK_URL
